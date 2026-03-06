@@ -1,0 +1,30 @@
+{% extends "hub/base.html" %}
+{% block title %}{{ unit.name }} · badingandyombots{% endblock %}
+{% block content %}
+
+<div class="card p-4 soft">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+      <h3 class="mb-1">{{ unit.name }}</h3>
+      <div class="text-muted small">Choose semester</div>
+    </div>
+    <a class="btn btn-outline-dark" href="{% url 'learning_units' %}">Back</a>
+  </div>
+
+  <hr class="my-3">
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <a class="btn btn-gold w-100 py-3" href="{% url 'semester_detail' unit.id 1 %}">
+        1st Semester
+      </a>
+    </div>
+    <div class="col-md-6">
+      <a class="btn btn-outline-dark w-100 py-3" href="{% url 'semester_detail' unit.id 2 %}">
+        2nd Semester
+      </a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "hub/base.html" %}
+{% block title %}Deadlines · badingandyombots{% endblock %}
+{% block content %}
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card p-4 soft">
+      <h3 class="mb-1">Add deadline</h3>
+      <div class="text-muted small mb-3">Shows on Home (this week & next week)</div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="kind" value="deadline">
+        <div class="mb-2">{{ deadline_form.title }}</div>
+        <div class="mb-2">{{ deadline_form.due_at }}</div>
+        <div class="mb-3">{{ deadline_form.notes }}</div>
+        <button class="btn btn-gold" type="submit">Save deadline</button>
+      </form>
+    </div>
+
+    <div class="card p-4 soft mt-4">
+      <h3 class="mb-1">Add exam</h3>
+      <div class="text-muted small mb-3">Shows on Home (this week & next week)</div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="kind" value="exam">
+        <div class="mb-2">{{ exam_form.title }}</div>
+        <div class="mb-2">{{ exam_form.exam_at }}</div>
+        <div class="mb-3">{{ exam_form.notes }}</div>
+        <button class="btn btn-gold" type="submit">Save exam</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card p-4 soft">
+      <h3 class="mb-3">Deadlines</h3>
+      {% for d in deadlines %}
+        <div class="p-2 bg-white border soft d-flex justify-content-between align-items-center mb-2">
+          <div>
+            <div class="fw-semibold">{{ d.title }}</div>
+            <div class="text-muted small">{{ d.due_at|date:"D, M j · g:i A" }}</div>
+          </div>
+          <form method="post" action="{% url 'deadline_delete' d.id %}">
+            {% csrf_token %}
+            <button class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete?')">Delete</button>
+          </form>
+        </div>
+      {% empty %}
+        <div class="text-muted">No deadlines yet.</div>
+      {% endfor %}
+    </div>
+
+    <div class="card p-4 soft mt-4">
+      <h3 class="mb-3">Exams</h3>
+      {% for e in exams %}
+        <div class="p-2 bg-white border soft d-flex justify-content-between align-items-center mb-2">
+          <div>
+            <div class="fw-semibold">{{ e.title }}</div>
+            <div class="text-muted small">{{ e.exam_at|date:"D, M j · g:i A" }}</div>
+          </div>
+          <form method="post" action="{% url 'exam_delete' e.id %}">
+            {% csrf_token %}
+            <button class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete?')">Delete</button>
+          </form>
+        </div>
+      {% empty %}
+        <div class="text-muted">No exams yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "hub/base.html" %}
+{% block title %}Account · badingandyombots{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card p-4 soft">
+      <h3 class="mb-1">Account</h3>
+      <div class="text-muted small mb-3">Update your profile info.</div>
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-2">
+          <div class="col-md-6 mb-2">
+            <label class="form-label small text-muted">First name</label>
+            {{ form.first_name }}
+          </div>
+          <div class="col-md-6 mb-2">
+            <label class="form-label small text-muted">Last name</label>
+            {{ form.last_name }}
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small text-muted">Email</label>
+          {{ form.email }}
+        </div>
+
+        <button class="btn btn-gold" type="submit">Save</button>
+
+        <a class="btn btn-outline-dark ms-2" href="{% url 'password_change' %}">
+          Change password
+        </a>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,211 @@
+{% extends "hub/base.html" %}
+{% block title %}Home · badingandyombots{% endblock %}
+{% block content %}
+
+<div class="row g-4">
+  <!-- Left column: calendar + links -->
+  <div class="col-lg-4">
+    <div class="card p-4 soft">
+      <h4 class="mb-2">Calendar</h4>
+      <div class="text-muted small mb-3">{{ today|date:"F Y" }}</div>
+
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr class="text-muted small">
+              <th class="text-center">Mon</th>
+              <th class="text-center">Tue</th>
+              <th class="text-center">Wed</th>
+              <th class="text-center">Thu</th>
+              <th class="text-center">Fri</th>
+              <th class="text-center">Sat</th>
+              <th class="text-center">Sun</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for week in month_weeks %}
+              <tr>
+                {% for day in week %}
+                  {% if day == today %}
+                    <td class="text-center">
+                      <span class="badge rounded-pill" style="background: var(--upcm-maroon);">
+                        {{ day.day }}
+                      </span>
+                    </td>
+                  {% else %}
+                    <td class="text-center text-muted">{{ day.day }}</td>
+                  {% endif %}
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card p-4 soft mt-4">
+      <h4 class="mb-3">Quick links</h4>
+      <div class="d-grid gap-2">
+        <a class="btn btn-outline-dark" target="_blank" href="{{ load_url }}">Load</a>
+        <a class="btn btn-outline-dark" target="_blank" href="{{ drive_url }}">Academic Drive</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right column: dashboard -->
+  <div class="col-lg-8">
+    <!-- Photos slideshow + add/delete -->
+    <div class="card p-4 soft mb-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <h4 class="mb-1">Photos</h4>
+          <div class="text-muted small">Anyone can add/delete. No uploader labels.</div>
+        </div>
+
+        <form class="d-flex gap-2 align-items-center" method="post" action="{% url 'photo_add' %}" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div style="min-width: 220px;">{{ photo_form.image }}</div>
+          <div style="min-width: 220px;">{{ photo_form.caption }}</div>
+          <button class="btn btn-gold" type="submit">Add</button>
+        </form>
+      </div>
+
+      <hr class="my-3">
+
+      {% if photos %}
+        <div id="photoCarousel" class="carousel slide soft overflow-hidden" data-bs-ride="carousel">
+          <div class="carousel-inner">
+            {% for p in photos %}
+              <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <div class="position-relative">
+                  <img src="{{ p.image.url }}" class="d-block w-100" style="max-height: 330px; object-fit: cover;" alt="photo">
+                  <div class="position-absolute bottom-0 start-0 end-0 p-3" style="background: linear-gradient(transparent, rgba(0,0,0,.55));">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="text-white small">
+                        {% if p.caption %}{{ p.caption }}{% else %}&nbsp;{% endif %}
+                      </div>
+                      <form method="post" action="{% url 'photo_delete' p.id %}">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-outline-light" onclick="return confirm('Delete this photo?')">
+                          Delete
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <button class="carousel-control-prev" type="button" data-bs-target="#photoCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#photoCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+          </button>
+        </div>
+      {% else %}
+        <div class="text-muted">No photos yet. Add one above.</div>
+      {% endif %}
+    </div>
+
+    <div class="row g-4">
+      <!-- Classes today -->
+      <div class="col-md-6">
+        <div class="card p-4 soft h-100">
+          <h4 class="mb-1">Classes today</h4>
+          <div class="text-muted small mb-3">{{ today|date:"D, M j" }}</div>
+
+          {% for c in classes_today %}
+            <div class="p-2 bg-white border soft mb-2">
+              <div class="fw-semibold">{{ c.title }}</div>
+              <div class="text-muted small">
+                {{ c.start_time|time:"g:i A" }} – {{ c.end_time|time:"g:i A" }}
+                {% if c.location %} · {{ c.location }}{% endif %}
+              </div>
+            </div>
+          {% empty %}
+            <div class="text-muted">No classes today.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Classes tomorrow -->
+      <div class="col-md-6">
+        <div class="card p-4 soft h-100">
+          <h4 class="mb-1">Classes tomorrow</h4>
+          <div class="text-muted small mb-3">{{ tomorrow }}</div>
+
+          {% for c in classes_tomorrow %}
+            <div class="p-2 bg-white border soft mb-2">
+              <div class="fw-semibold">{{ c.title }}</div>
+              <div class="text-muted small">
+                {{ c.start_time|time:"g:i A" }} – {{ c.end_time|time:"g:i A" }}
+                {% if c.location %} · {{ c.location }}{% endif %}
+              </div>
+            </div>
+          {% empty %}
+            <div class="text-muted">No classes tomorrow.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Deadlines -->
+      <div class="col-md-6">
+        <div class="card p-4 soft h-100">
+          <h4 class="mb-2">Deadlines</h4>
+
+          <div class="fw-semibold mb-1">This week</div>
+          {% for d in deadlines_this_week %}
+            <div class="p-2 bg-white border soft mb-2">
+              <div class="fw-semibold">{{ d.title }}</div>
+              <div class="text-muted small">{{ d.due_at|date:"D, M j · g:i A" }}</div>
+            </div>
+          {% empty %}
+            <div class="text-muted small mb-2">No deadlines this week.</div>
+          {% endfor %}
+
+          <div class="fw-semibold mt-3 mb-1">Next week</div>
+          {% for d in deadlines_next_week %}
+            <div class="p-2 bg-white border soft mb-2">
+              <div class="fw-semibold">{{ d.title }}</div>
+              <div class="text-muted small">{{ d.due_at|date:"D, M j · g:i A" }}</div>
+            </div>
+          {% empty %}
+            <div class="text-muted small">No deadlines next week.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Exams -->
+      <div class="col-md-6">
+        <div class="card p-4 soft h-100">
+          <h4 class="mb-2">Exams</h4>
+
+          <div class="fw-semibold mb-1">This week</div>
+          {% for e in exams_this_week %}
+            <div class="p-2 bg-white border soft mb-2">
+              <div class="fw-semibold">{{ e.title }}</div>
+              <div class="text-muted small">{{ e.exam_at|date:"D, M j · g:i A" }}</div>
+            </div>
+          {% empty %}
+            <div class="text-muted small mb-2">No exams this week.</div>
+          {% endfor %}
+
+          <div class="fw-semibold mt-3 mb-1">Next week</div>
+          {% for e in exams_next_week %}
+            <div class="p-2 bg-white border soft mb-2">
+              <div class="fw-semibold">{{ e.title }}</div>
+              <div class="text-muted small">{{ e.exam_at|date:"D, M j · g:i A" }}</div>
+            </div>
+          {% empty %}
+            <div class="text-muted small">No exams next week.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

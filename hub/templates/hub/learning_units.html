@@ -1,0 +1,25 @@
+{% extends "hub/base.html" %}
+{% block title %}Learning Units · badingandyombots{% endblock %}
+{% block content %}
+
+<div class="card p-4 soft">
+  <h3 class="mb-1">Learning Units</h3>
+  <div class="text-muted small mb-3">LU3–LU7</div>
+
+  <div class="row g-3">
+    {% for u in units %}
+      <div class="col-md-4">
+        <a href="{% url 'unit_detail' u.id %}" class="text-decoration-none">
+          <div class="p-3 bg-white border soft h-100">
+            <div class="fw-semibold">{{ u.name }}</div>
+            <div class="text-muted small">Open semesters</div>
+          </div>
+        </a>
+      </div>
+    {% empty %}
+      <div class="text-muted">No units found. Seed LU3–LU7 first.</div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

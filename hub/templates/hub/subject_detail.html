@@ -1,0 +1,122 @@
+{% extends "hub/base.html" %}
+{% block title %}{{ subject.title }} · badingandyombots{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <div>
+    <h3 class="mb-1">{{ subject.title }}</h3>
+    <div class="text-muted small">Folders & files — create, rename, upload, delete</div>
+  </div>
+  <a class="btn btn-outline-dark" href="{% url 'semester_detail' subject.semester.unit.id subject.semester.number %}">
+    Back to subjects
+  </a>
+</div>
+
+<div class="row g-4">
+  <!-- Create folder + upload file -->
+  <div class="col-lg-4">
+    <div class="card p-4 soft">
+      <h5 class="mb-2">Create folder</h5>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create_folder">
+        <div class="mb-2">{{ folder_form.name }}</div>
+        <button class="btn btn-gold w-100" type="submit">Create folder</button>
+      </form>
+
+      <hr class="my-3">
+
+      <h5 class="mb-2">Upload file</h5>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="upload_file">
+        <div class="mb-2">
+          <label class="form-label small text-muted">Folder (optional)</label>
+          {{ file_form.folder }}
+        </div>
+        <div class="mb-2">{{ file_form.title }}</div>
+        <div class="mb-3">{{ file_form.file }}</div>
+        <button class="btn btn-outline-dark w-100" type="submit">Upload</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Folders + files -->
+  <div class="col-lg-8">
+    <div class="card p-4 soft">
+      <h5 class="mb-3">Folders</h5>
+
+      {% for folder in folders %}
+        <div class="p-3 bg-white border soft mb-3">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div class="fw-semibold">{{ folder.name }}</div>
+
+            <div class="d-flex gap-2 flex-wrap">
+              <!-- rename -->
+              <form method="post" action="{% url 'folder_rename' folder.id %}" class="d-flex gap-2">
+                {% csrf_token %}
+                <input class="form-control form-control-sm" name="name" placeholder="Rename folder" style="width: 190px;">
+                <button class="btn btn-sm btn-outline-dark">Rename</button>
+              </form>
+
+              <!-- delete -->
+              <form method="post" action="{% url 'folder_delete' folder.id %}">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this folder and its files?')">
+                  Delete folder
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            {% for f in folder.files.all %}
+              <div class="d-flex justify-content-between align-items-center border rounded-3 p-2 mb-2">
+                <div>
+                  <div class="fw-semibold">{{ f.title }}</div>
+                  <div class="text-muted small">{{ f.uploaded_at|date:"M j, Y · g:i A" }}</div>
+                </div>
+                <div class="d-flex gap-2">
+                  <a class="btn btn-sm btn-outline-dark" href="{{ f.file.url }}" target="_blank">Open</a>
+                  <form method="post" action="{% url 'file_delete' f.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete file?')">
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </div>
+            {% empty %}
+              <div class="text-muted small">No files inside this folder yet.</div>
+            {% endfor %}
+          </div>
+        </div>
+      {% empty %}
+        <div class="text-muted">No folders yet.</div>
+      {% endfor %}
+
+      <hr class="my-4">
+
+      <h5 class="mb-3">Files (no folder)</h5>
+      {% for f in loose_files %}
+        <div class="d-flex justify-content-between align-items-center border rounded-3 p-2 mb-2 bg-white">
+          <div>
+            <div class="fw-semibold">{{ f.title }}</div>
+            <div class="text-muted small">{{ f.uploaded_at|date:"M j, Y · g:i A" }}</div>
+          </div>
+          <div class="d-flex gap-2">
+            <a class="btn btn-sm btn-outline-dark" href="{{ f.file.url }}" target="_blank">Open</a>
+            <form method="post" action="{% url 'file_delete' f.id %}">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete file?')">Delete</button>
+            </form>
+          </div>
+        </div>
+      {% empty %}
+        <div class="text-muted small">No loose files.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "hub/base.html" %}
+{% block title %}{{ semester }} · badingandyombots{% endblock %}
+{% block content %}
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card p-4 soft">
+      <h4 class="mb-1">Create subject</h4>
+      <div class="text-muted small mb-3">{{ unit.name }} · {{ semester.get_number_display }}</div>
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          {{ subject_form.title }}
+        </div>
+        <button class="btn btn-gold w-100" type="submit">Create</button>
+      </form>
+
+      <hr class="my-3">
+
+      <a class="btn btn-outline-dark w-100" href="{% url 'unit_detail' unit.id %}">
+        Back to semesters
+      </a>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card p-4 soft">
+      <h4 class="mb-2">Subjects</h4>
+      <div class="text-muted small mb-3">Click a subject to manage folders & files.</div>
+
+      <div class="row g-3">
+        {% for s in subjects %}
+          <div class="col-md-6">
+            <a class="text-decoration-none" href="{% url 'subject_detail' s.id %}">
+              <div class="p-3 bg-white border soft h-100">
+                <div class="fw-semibold">{{ s.title }}</div>
+                <div class="text-muted small">Open</div>
+              </div>
+            </a>
+          </div>
+        {% empty %}
+          <div class="text-muted">No subjects yet. Create one on the left.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
